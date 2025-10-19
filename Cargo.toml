@@ -1,0 +1,40 @@
+[package]
+name = "wtf"
+version = "0.0.1"
+edition = "2021"
+authors = ["Mew <mauminh.nguyen@gmail.com>"]
+license = "MIT"
+description = "Cross-platform CLI tool that automatically detects and fixes typos in your previous shell commands with 300+ built-in typos and custom typo management"
+repository = "https://github.com/mewisme/wtf"
+keywords = ["cli", "typo", "shell", "command", "fixer"]
+categories = ["command-line-utilities"]
+build = "build.rs"
+
+[[bin]]
+name = "wtf"
+path = "src/main.rs"
+
+[dependencies]
+clap = { version = "4.5", features = ["derive"] }
+colored = "2.1"
+strsim = "0.11"
+dirs = "5.0"
+regex = "1.10"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+tokio = { version = "1.41", features = ["rt-multi-thread", "macros"] }
+reqwest = { version = "0.12", features = ["json"] }
+
+[target.'cfg(windows)'.build-dependencies]
+winres = "0.1.12"
+
+[profile.release]
+opt-level = "z"
+lto = "fat"
+panic = "abort"
+codegen-units = 1
+strip = true
+debug = false
+debug-assertions = false
+overflow-checks = false
+incremental = false
