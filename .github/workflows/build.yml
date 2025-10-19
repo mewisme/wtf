@@ -162,12 +162,12 @@ jobs:
             COMMIT_DESC=$(git log -1 --pretty=%b)
           fi
 
-          echo "message_raw<<EOF" >> $GITHUB_OUTPUT
-          echo "$COMMIT_MSG" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
-
           echo "description_raw<<EOF" >> $GITHUB_OUTPUT
-          echo "$COMMIT_DESC" >> $GITHUB_OUTPUT
+          echo "$COMMIT_MSG" >> $GITHUB_OUTPUT
+          if [[ -n "$COMMIT_DESC" ]]; then
+            echo "" >> $GITHUB_OUTPUT
+            echo "$COMMIT_DESC" >> $GITHUB_OUTPUT
+          fi
           echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Download all artifacts
@@ -181,7 +181,7 @@ jobs:
             wtf-linux-x86_64/*
             wtf-macos-x86_64/*
           tag_name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || format('v{0}', needs.check-version.outputs.version) }}
-          name: ${{ steps.commit-info.outputs.message_raw }}
+          name: Release v${{ needs.check-version.outputs.version }}
           body: ${{ steps.commit-info.outputs.description_raw }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
