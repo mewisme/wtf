@@ -140,29 +140,9 @@ jobs:
           name: ${{ matrix.artifact_name }}
           path: ${{ matrix.artifact_name }}
 
-  upload-docs:
-    name: Upload Documentation
-    needs: check-version
-    if: ${{ needs.check-version.outputs.should_release == 'true' || startsWith(github.ref, 'refs/tags/') }}
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Upload README
-        uses: actions/upload-artifact@v4
-        with:
-          name: README
-          path: README.md
-
-      - name: Upload LICENSE
-        uses: actions/upload-artifact@v4
-        with:
-          name: LICENSE
-          path: LICENSE
-
   release:
     name: Create Release
-    needs: [check-version, build, upload-docs]
+    needs: [check-version, build]
     if: ${{ needs.check-version.outputs.should_release == 'true' || startsWith(github.ref, 'refs/tags/') }}
     runs-on: ubuntu-latest
     steps:
@@ -200,8 +180,6 @@ jobs:
             wtf-win-x86_64/*
             wtf-linux-x86_64/*
             wtf-macos-x86_64/*
-            README/*
-            LICENSE/*
           tag_name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || format('v{0}', needs.check-version.outputs.version) }}
           name: ${{ steps.commit-info.outputs.message_raw }}
           body: ${{ steps.commit-info.outputs.description_raw }}
