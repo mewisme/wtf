@@ -1,45 +1,6 @@
+use crate::config::UserConfig;
 use colored::Colorize;
-use serde::{Deserialize, Serialize};
 use std::env;
-
-#[derive(Debug, Serialize, Deserialize, Default)]
-pub struct AIConfig {
-  pub api_key: Option<String>,
-}
-
-impl AIConfig {
-  pub fn load() -> Self {
-    if let Some(config_dir) = dirs::config_dir() {
-      let config_file = config_dir.join("wtf").join("ai_config.json");
-      if config_file.exists() {
-        if let Ok(content) = std::fs::read_to_string(&config_file) {
-          if let Ok(config) = serde_json::from_str(&content) {
-            return config;
-          }
-        }
-      }
-    }
-    Self::default()
-  }
-
-  pub fn save(&self) -> Result<(), String> {
-    let config_dir = dirs::config_dir()
-      .ok_or("Could not find config directory")?
-      .join("wtf");
-
-    std::fs::create_dir_all(&config_dir)
-      .map_err(|e| format!("Failed to create config directory: {}", e))?;
-
-    let config_file = config_dir.join("ai_config.json");
-    let content = serde_json::to_string_pretty(self)
-      .map_err(|e| format!("Failed to serialize config: {}", e))?;
-
-    std::fs::write(&config_file, content)
-      .map_err(|e| format!("Failed to save AI config: {}", e))?;
-
-    Ok(())
-  }
-}
 
 pub fn check_api_key() -> Result<String, String> {
   // Try environment variable first
@@ -50,8 +11,8 @@ pub fn check_api_key() -> Result<String, String> {
   }
 
   // Try from config
-  let config = AIConfig::load();
-  if let Some(key) = config.api_key {
+  let config = UserConfig::load();
+  if let Some(key) = config.get_google_api_key() {
     if !key.is_empty() {
       return Ok(key);
     }
@@ -61,8 +22,8 @@ pub fn check_api_key() -> Result<String, String> {
 }
 
 pub fn save_api_key(key: String) -> Result<(), String> {
-  let mut config = AIConfig::load();
-  config.api_key = Some(key);
+  let mut config = UserConfig::load();
+  config.set_google_api_key(key);
   config.save()?;
   Ok(())
 }

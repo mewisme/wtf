@@ -457,7 +457,8 @@ Format:
     ["deploy-prod", "npm run deploy:production"]
   ],
   "first_run_complete": true,
-  "auto_mode": false
+  "auto_mode": false,
+  "google_api_key": "your-api-key-here"
 }
 ```
 
@@ -465,6 +466,7 @@ Format:
 - `custom_typos`: Your custom typo definitions
 - `first_run_complete`: Automatically set to `true` after first-time setup prompt
 - `auto_mode`: Enable/disable auto-run mode (set via `wtf auto-mode` command)
+- `google_api_key`: Google AI API key for AI-powered fixing (set via `wtf set-api-key` command)
 
 ## 🚀 Performance
 

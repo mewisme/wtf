@@ -9,6 +9,8 @@ pub struct UserConfig {
   pub first_run_complete: bool,
   #[serde(default)]
   pub auto_mode: bool,
+  #[serde(default)]
+  pub google_api_key: Option<String>,
 }
 
 impl Default for UserConfig {
@@ -17,6 +19,7 @@ impl Default for UserConfig {
       custom_typos: Vec::new(),
       first_run_complete: false,
       auto_mode: false,
+      google_api_key: None,
     }
   }
 }
@@ -86,6 +89,14 @@ impl UserConfig {
   pub fn toggle_auto_mode(&mut self) -> bool {
     self.auto_mode = !self.auto_mode;
     self.auto_mode
+  }
+
+  pub fn set_google_api_key(&mut self, key: String) {
+    self.google_api_key = Some(key);
+  }
+
+  pub fn get_google_api_key(&self) -> Option<String> {
+    self.google_api_key.clone()
   }
 
   fn config_path() -> Result<PathBuf, String> {
