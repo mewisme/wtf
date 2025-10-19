@@ -100,18 +100,8 @@ impl UserConfig {
   }
 
   fn config_path() -> Result<PathBuf, String> {
-    let config_dir = if cfg!(target_os = "windows") {
-      dirs::config_dir()
-        .ok_or("Could not find config directory")?
-        .join("wtf")
-    } else {
-      dirs::home_dir()
-        .ok_or("Could not find home directory")?
-        .join(".config")
-        .join("wtf")
-    };
-
-    Ok(config_dir.join("config.json"))
+    let home = dirs::home_dir().ok_or("Could not find home directory")?;
+    Ok(home.join(".wtf").join("config.json"))
   }
 
   pub fn get_config_path_display() -> String {

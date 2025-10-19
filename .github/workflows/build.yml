@@ -65,7 +65,7 @@ jobs:
           VERSION="${{ steps.get-version.outputs.version }}"
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
-          git tag -a "v$VERSION" -m "Release v$VERSION"
+          git tag -a "v$VERSION" -m "Release $VERSION"
           git push origin "v$VERSION"
 
   build:
@@ -181,7 +181,7 @@ jobs:
             wtf-linux-x86_64/*
             wtf-macos-x86_64/*
           tag_name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || format('v{0}', needs.check-version.outputs.version) }}
-          name: Release v${{ needs.check-version.outputs.version }}
+          name: v${{ needs.check-version.outputs.version }}
           body: ${{ steps.commit-info.outputs.description_raw }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
