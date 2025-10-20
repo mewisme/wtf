@@ -77,23 +77,65 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          # Windows
           - os: windows-latest
             target: x86_64-pc-windows-msvc
             artifact_name: wtf-win-x86_64
             binary_name: wtf.exe
             binary_path: target/x86_64-pc-windows-msvc/release/wtf.exe
 
+          - os: windows-latest
+            target: i686-pc-windows-msvc
+            artifact_name: wtf-win-x86
+            binary_name: wtf.exe
+            binary_path: target/i686-pc-windows-msvc/release/wtf.exe
+
+          - os: windows-latest
+            target: aarch64-pc-windows-msvc
+            artifact_name: wtf-win-aarch64
+            binary_name: wtf.exe
+            binary_path: target/aarch64-pc-windows-msvc/release/wtf.exe
+
+          # Linux
           - os: ubuntu-latest
             target: x86_64-unknown-linux-gnu
             artifact_name: wtf-linux-x86_64
             binary_name: wtf
             binary_path: target/x86_64-unknown-linux-gnu/release/wtf
 
+          - os: ubuntu-latest
+            target: i686-unknown-linux-gnu
+            artifact_name: wtf-linux-x86
+            binary_name: wtf
+            binary_path: target/i686-unknown-linux-gnu/release/wtf
+            cross: true
+
+          - os: ubuntu-latest
+            target: aarch64-unknown-linux-gnu
+            artifact_name: wtf-linux-aarch64
+            binary_name: wtf
+            binary_path: target/aarch64-unknown-linux-gnu/release/wtf
+            cross: true
+
+          - os: ubuntu-latest
+            target: armv7-unknown-linux-gnueabihf
+            artifact_name: wtf-linux-armv7
+            binary_name: wtf
+            binary_path: target/armv7-unknown-linux-gnueabihf/release/wtf
+            cross: true
+
+          # macOS
           - os: macos-latest
             target: x86_64-apple-darwin
             artifact_name: wtf-macos-x86_64
             binary_name: wtf
             binary_path: target/x86_64-apple-darwin/release/wtf
+
+          - os: macos-latest
+            target: aarch64-apple-darwin
+            artifact_name: wtf-macos-aarch64
+            binary_name: wtf
+            binary_path: target/aarch64-apple-darwin/release/wtf
 
     steps:
       - uses: actions/checkout@v4
@@ -114,8 +156,18 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-cargo-
 
-      - name: Build binary
+      - name: Install cross for ARM builds
+        if: matrix.cross == true
+        run: |
+          cargo install cross --git https://github.com/cross-rs/cross
+
+      - name: Build binary (native)
+        if: matrix.cross != true
         run: cargo build --release --target ${{ matrix.target }}
+
+      - name: Build binary (cross)
+        if: matrix.cross == true
+        run: cross build --release --target ${{ matrix.target }}
 
       - name: Rename binary with extension
         shell: bash
@@ -178,8 +230,14 @@ jobs:
         with:
           files: |
             wtf-win-x86_64/*
+            wtf-win-x86/*
+            wtf-win-aarch64/*
             wtf-linux-x86_64/*
+            wtf-linux-x86/*
+            wtf-linux-aarch64/*
+            wtf-linux-armv7/*
             wtf-macos-x86_64/*
+            wtf-macos-aarch64/*
           tag_name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || format('v{0}', needs.check-version.outputs.version) }}
           name: v${{ needs.check-version.outputs.version }}
           body: ${{ steps.commit-info.outputs.description_raw }}

@@ -17,6 +17,26 @@ A cross-platform CLI tool that fixes typos in your previous shell commands. When
 
 ## 📦 Installation
 
+### Supported Platforms
+
+| Platform | Architecture | Binary Name | Notes |
+|----------|-------------|-------------|-------|
+| **Windows** | x86_64 (64-bit) | `wtf-win-x86_64.exe` | Intel/AMD 64-bit processors |
+| **Windows** | x86 (32-bit) | `wtf-win-x86.exe` | Intel/AMD 32-bit processors |
+| **Windows** | ARM64 | `wtf-win-aarch64.exe` | ARM-based Windows devices |
+| **Linux** | x86_64 (64-bit) | `wtf-linux-x86_64` | Intel/AMD 64-bit processors |
+| **Linux** | x86 (32-bit) | `wtf-linux-x86` | Intel/AMD 32-bit processors |
+| **Linux** | ARM64 (aarch64) | `wtf-linux-aarch64` | ARM servers, Raspberry Pi 4+ |
+| **Linux** | ARMv7 (32-bit) | `wtf-linux-armv7` | Raspberry Pi 3, older ARM |
+| **macOS** | x86_64 (Intel) | `wtf-macos-x86_64` | Intel-based Macs |
+| **macOS** | ARM64 (Apple Silicon) | `wtf-macos-aarch64` | M1, M2, M3, M4 Macs |
+
+**All platforms support:**
+- ✅ Shell history detection (PowerShell, Bash, Zsh, Fish)
+- ✅ Google Gemini AI integration
+- ✅ Auto-mode and custom typos
+- ✅ PATH management with `install`/`uninstall` commands
+
 ### APT (Debian/Ubuntu) - Recommended
 
 ```bash
@@ -30,6 +50,44 @@ sudo apt install wtf
 
 # Ready to use!
 wtf --version
+```
+
+### Download Pre-built Binaries
+
+Download the latest release for your platform from [GitHub Releases](https://github.com/mewisme/wtf/releases):
+
+```bash
+# Linux x86_64 (64-bit)
+wget https://github.com/mewisme/wtf/releases/latest/download/wtf-linux-x86_64
+chmod +x wtf-linux-x86_64
+sudo mv wtf-linux-x86_64 /usr/local/bin/wtf
+
+# Linux x86 (32-bit)
+wget https://github.com/mewisme/wtf/releases/latest/download/wtf-linux-x86
+chmod +x wtf-linux-x86
+sudo mv wtf-linux-x86 /usr/local/bin/wtf
+
+# Linux ARM64
+wget https://github.com/mewisme/wtf/releases/latest/download/wtf-linux-aarch64
+chmod +x wtf-linux-aarch64
+sudo mv wtf-linux-aarch64 /usr/local/bin/wtf
+
+# macOS Intel
+curl -L https://github.com/mewisme/wtf/releases/latest/download/wtf-macos-x86_64 -o wtf
+chmod +x wtf
+sudo mv wtf /usr/local/bin/
+
+# macOS Apple Silicon
+curl -L https://github.com/mewisme/wtf/releases/latest/download/wtf-macos-aarch64 -o wtf
+chmod +x wtf
+sudo mv wtf /usr/local/bin/
+
+# Windows (PowerShell)
+# Download from releases:
+# - wtf-win-x86_64.exe (64-bit)
+# - wtf-win-x86.exe (32-bit)
+# - wtf-win-aarch64.exe (ARM64)
+# Then run: .\wtf.exe install
 ```
 
 ### Build from Source
@@ -59,6 +117,7 @@ wtf --version
 
 **First-time experience:**
 - ✅ Automatic prompt on first run
+- ✅ Auto-configure bash history (Linux only)
 - ✅ One-time only (won't ask again)
 - ✅ Skip by pressing 'n'
 - ✅ Manual install anytime with `wtf install`
@@ -68,6 +127,46 @@ wtf --version
 ```bash
 wtf uninstall    # or short: wtf u
 ```
+
+### 🐧 Bash Configuration (Linux)
+
+**Automatic Configuration (Recommended):**
+
+On first run, `wtf` will automatically detect if you're using bash and offer to configure it for you:
+
+```
+📝 Bash History Configuration
+
+For real-time history updates, we need to configure bash.
+This will allow WTF to see your most recent commands.
+
+Configuration to add:
+  shopt -s histappend
+  PROMPT_COMMAND='history -a'
+
+Configure bash history now? [Y/n]:
+```
+
+Just press Enter to accept, and `wtf` will automatically add the required configuration to your `~/.bashrc`!
+
+**Manual Configuration:**
+
+If you prefer to configure manually, add this to your `~/.bashrc`:
+
+```bash
+# Enable history appending instead of overwriting
+shopt -s histappend
+
+# Write history immediately after each command
+PROMPT_COMMAND='history -a'
+```
+
+Then reload: `source ~/.bashrc`
+
+**Why this is needed:**
+- Bash only writes to `.bash_history` when the shell exits
+- These settings make bash write history immediately
+- Without this, `wtf` may not see your most recent commands
 
 
 ## 🚀 Usage

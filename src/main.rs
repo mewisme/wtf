@@ -258,6 +258,122 @@ fn handle_first_run_prompt(config: &mut UserConfig) {
     println!("  wtf install");
     println!();
   }
+
+  // Check and configure bash history on Linux
+  #[cfg(not(target_os = "windows"))]
+  check_and_configure_bash_history();
+}
+
+#[cfg(not(target_os = "windows"))]
+fn check_and_configure_bash_history() {
+  use std::env;
+  use std::fs;
+  use std::io::{self, Write};
+
+  // Only check for bash
+  let shell = env::var("SHELL").unwrap_or_default();
+  if !shell.contains("bash") {
+    return;
+  }
+
+  let home = match dirs::home_dir() {
+    Some(h) => h,
+    None => return,
+  };
+
+  let bashrc_path = home.join(".bashrc");
+  if !bashrc_path.exists() {
+    return;
+  }
+
+  // Read current bashrc
+  let bashrc_content = match fs::read_to_string(&bashrc_path) {
+    Ok(content) => content,
+    Err(_) => return,
+  };
+
+  // Check if already configured
+  let has_histappend = bashrc_content.contains("shopt -s histappend");
+  let has_prompt_command =
+    bashrc_content.contains("PROMPT_COMMAND") && bashrc_content.contains("history -a");
+
+  if has_histappend && has_prompt_command {
+    return; // Already configured
+  }
+
+  println!();
+  println!("{}", "📝 Bash History Configuration".bright_cyan().bold());
+  println!();
+  println!(
+    "{}",
+    "For real-time history updates, we need to configure bash.".bright_white()
+  );
+  println!("This will allow WTF to see your most recent commands.");
+  println!();
+  println!("{}", "Configuration to add:".dimmed());
+  println!("  shopt -s histappend");
+  println!("  PROMPT_COMMAND='history -a'");
+  println!();
+  print!("{} [Y/n]: ", "Configure bash history now?".bright_cyan());
+  io::stdout().flush().unwrap();
+
+  let mut input = String::new();
+  io::stdin().read_line(&mut input).ok();
+  let answer = input.trim().to_lowercase();
+
+  if answer.is_empty() || answer == "y" || answer == "yes" {
+    let mut new_content = bashrc_content.clone();
+
+    // Add newlines before our configuration
+    new_content.push_str("\n\n");
+    new_content.push_str("# WTF - Command Typo Fixer: Enable real-time history\n");
+
+    if !has_histappend {
+      new_content.push_str("shopt -s histappend\n");
+    }
+
+    if !has_prompt_command {
+      new_content.push_str("PROMPT_COMMAND='history -a'\n");
+    }
+
+    match fs::write(&bashrc_path, new_content) {
+      Ok(_) => {
+        println!();
+        println!(
+          "{} {}",
+          "✓".bright_green(),
+          "Bash configuration updated!".bright_green()
+        );
+        println!();
+        println!("{}", "Run this to apply changes:".bright_cyan());
+        println!("  source ~/.bashrc");
+        println!();
+      }
+      Err(e) => {
+        eprintln!();
+        eprintln!("{}", format!("Failed to update .bashrc: {}", e).red());
+        eprintln!();
+        eprintln!(
+          "{}",
+          "You can manually add these lines to ~/.bashrc:".yellow()
+        );
+        eprintln!("  shopt -s histappend");
+        eprintln!("  PROMPT_COMMAND='history -a'");
+        println!();
+      }
+    }
+  } else {
+    println!();
+    println!("{}", "Skipped bash configuration.".yellow());
+    println!();
+    println!(
+      "{}",
+      "You can manually add these to ~/.bashrc:".bright_cyan()
+    );
+    println!("  shopt -s histappend");
+    println!("  PROMPT_COMMAND='history -a'");
+    println!();
+  }
 }
 
 fn handle_fix(auto_yes: bool, debug: bool, user_config: &UserConfig) {
