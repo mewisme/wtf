@@ -24,10 +24,10 @@ A cross-platform CLI tool that fixes typos in your previous shell commands. When
 | **Windows** | x86_64 (64-bit) | `wtf-win-x86_64.exe` | Intel/AMD 64-bit processors |
 | **Windows** | x86 (32-bit) | `wtf-win-x86.exe` | Intel/AMD 32-bit processors |
 | **Windows** | ARM64 | `wtf-win-aarch64.exe` | ARM-based Windows devices |
-| **Linux** | x86_64 (64-bit) | `wtf-linux-x86_64` | Intel/AMD 64-bit processors |
-| **Linux** | x86 (32-bit) | `wtf-linux-x86` | Intel/AMD 32-bit processors |
-| **Linux** | ARM64 (aarch64) | `wtf-linux-aarch64` | ARM servers, Raspberry Pi 4+ |
-| **Linux** | ARMv7 (32-bit) | `wtf-linux-armv7` | Raspberry Pi 3, older ARM |
+| **Linux** | x86_64 (64-bit) | `wtf-linux-x86_64` | Intel/AMD 64-bit (glibc) |
+| **Linux** | x86 (32-bit) | `wtf-linux-x86` | Intel/AMD 32-bit (musl, static) |
+| **Linux** | ARM64 (aarch64) | `wtf-linux-aarch64` | ARM servers, Pi 4+ (musl, static) |
+| **Linux** | ARMv7 (32-bit) | `wtf-linux-armv7` | Raspberry Pi 3 (musl, static) |
 | **macOS** | x86_64 (Intel) | `wtf-macos-x86_64` | Intel-based Macs |
 | **macOS** | ARM64 (Apple Silicon) | `wtf-macos-aarch64` | M1, M2, M3, M4 Macs |
 
@@ -36,6 +36,12 @@ A cross-platform CLI tool that fixes typos in your previous shell commands. When
 - ✅ Google Gemini AI integration
 - ✅ Auto-mode and custom typos
 - ✅ PATH management with `install`/`uninstall` commands
+
+**About musl binaries:**
+- **Static linking**: Musl binaries are fully self-contained, no system dependencies
+- **Universal compatibility**: Work on any Linux distro regardless of GLIBC version
+- **Slightly larger**: ~500KB larger than glibc, but more portable
+- **Best for**: ARM devices, embedded systems, old distros, containers
 
 ### APT (Debian/Ubuntu) - Recommended
 
