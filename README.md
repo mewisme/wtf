@@ -8,6 +8,7 @@ A cross-platform CLI tool that fixes typos in your previous shell commands. When
 - 🎯 **Fuzzy Matching**: Catches similar typos using Jaro-Winkler algorithm
 - 🤖 **AI-Powered Fixing**: Use Google Gemini for intelligent command correction
 - ⚡ **Auto-Mode**: Enable auto-run mode to skip confirmation prompts
+- 🧠 **AI Mode**: Enable AI mode to always use Google Gemini automatically
 - 🌍 **Cross-Platform**: Windows (PowerShell), Linux (Bash/Zsh/Fish), macOS
 - 📦 **300+ Built-in Typos**: Pre-configured for npm, git, cargo, docker, python, kubernetes, and more!
 - 🎨 **Beautiful Output**: Colored terminal output with interactive selection
@@ -508,6 +509,39 @@ wtf toggle-auto
 - ✅ Still can override with manual selection when needed
 - ✅ Saves keystrokes!
 
+### 🤖 AI Mode (Always Use AI)
+
+Enable AI mode to always use Google Gemini for command fixing (no need for `--ai` flag):
+
+```bash
+# Enable AI mode
+wtf ai-mode true
+✓ AI mode enabled!
+
+wtf will now use AI for command fixing (requires Google Gemini API key).
+
+This is equivalent to always using 'wtf --ai'
+
+# Now wtf always uses AI automatically
+npm onstall express
+wtf
+# Uses AI: 🤖 Asking Google Gemini to fix the command...
+
+# Disable AI mode
+wtf ai-mode false
+✓ AI mode disabled!
+
+# Or toggle on/off
+wtf toggle-ai
+✓ AI mode toggled ON!
+```
+
+**Benefits:**
+- ✅ No need to type `--ai` every time
+- ✅ Always get intelligent AI suggestions
+- ✅ Falls back to pattern matching if AI fails
+- ✅ Configurable per-user preference
+
 ## 🎯 Command Reference
 
 ```bash
@@ -530,13 +564,17 @@ wtf clear                 # Clear all custom typos
 wtf cls                   # Same as clear
 
 # Configuration
-wtf config                # Show config file location
-wtf cfg                   # Same as config
-wtf set-api-key <key>     # Set Google AI API key
+wtf config                 # Show config file location
+wtf cfg                    # Same as config
+wtf set-api-key <key>      # Set Google AI API key
 wtf auto-mode <true|false> # Enable/disable auto-run mode
 wtf am <true|false>        # Same as auto-mode
-wtf toggle-auto           # Toggle auto-mode on/off
-wtf ta                    # Same as toggle-auto
+wtf toggle-auto            # Toggle auto-mode on/off
+wtf ta                     # Same as toggle-auto
+wtf ai-mode <true|false>   # Enable/disable AI mode
+wtf aim <true|false>       # Same as ai-mode
+wtf toggle-ai              # Toggle AI mode on/off
+wtf tai                    # Same as toggle-ai
 
 # PATH Management
 wtf install               # Add to PATH (short: i)
@@ -558,11 +596,12 @@ wtf --version             # Show version
 1. **First-run setup**: On first use, wtf will ask if you want to install globally - press Y for convenience!
 2. **Quick install**: After building, run `./wtf install` to add to PATH
 3. **Enable auto-mode**: Run `wtf auto-mode true` to always auto-run first suggestion (no more `-y` needed!)
-4. **Use `-y` for speed**: Or use `-y` flag for one-time auto-run without enabling auto-mode
-5. **Build your library**: Add common typos you make with `wtf add`
-6. **Use `wtf save`**: When wtf doesn't recognize a typo, save it immediately
-7. **Custom shortcuts**: Add your own shortcuts (e.g., `wtf add "gs" "git status"`)
-8. **AI mode**: Set up Google Gemini for unlimited command fixing
+4. **Enable AI mode**: Run `wtf ai-mode true` to always use Google Gemini (no more `--ai` needed!)
+5. **Use `-y` for speed**: Or use `-y` flag for one-time auto-run without enabling auto-mode
+6. **Build your library**: Add common typos you make with `wtf add`
+7. **Use `wtf save`**: When wtf doesn't recognize a typo, save it immediately
+8. **Custom shortcuts**: Add your own shortcuts (e.g., `wtf add "gs" "git status"`)
+9. **Combine modes**: Enable both auto-mode and AI mode for the ultimate hands-free experience!
 
 ## 🔧 Configuration
 
@@ -580,6 +619,7 @@ Format:
   ],
   "first_run_complete": true,
   "auto_mode": false,
+  "ai_mode": false,
   "google_api_key": "your-api-key-here"
 }
 ```
@@ -588,6 +628,7 @@ Format:
 - `custom_typos`: Your custom typo definitions
 - `first_run_complete`: Automatically set to `true` after first-time setup prompt
 - `auto_mode`: Enable/disable auto-run mode (set via `wtf auto-mode` command)
+- `ai_mode`: Enable/disable AI mode to always use `--ai` flag (set via `wtf ai-mode` command)
 - `google_api_key`: Google AI API key for AI-powered fixing (set via `wtf set-api-key` command)
 
 ## 🚀 Performance

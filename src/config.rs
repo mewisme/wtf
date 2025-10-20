@@ -10,6 +10,8 @@ pub struct UserConfig {
   #[serde(default)]
   pub auto_mode: bool,
   #[serde(default)]
+  pub ai_mode: bool,
+  #[serde(default)]
   pub google_api_key: Option<String>,
 }
 
@@ -19,6 +21,7 @@ impl Default for UserConfig {
       custom_typos: Vec::new(),
       first_run_complete: false,
       auto_mode: false,
+      ai_mode: false,
       google_api_key: None,
     }
   }
@@ -86,6 +89,15 @@ impl UserConfig {
   pub fn toggle_auto_mode(&mut self) -> bool {
     self.auto_mode = !self.auto_mode;
     self.auto_mode
+  }
+
+  pub fn set_ai_mode(&mut self, enabled: bool) {
+    self.ai_mode = enabled;
+  }
+
+  pub fn toggle_ai_mode(&mut self) -> bool {
+    self.ai_mode = !self.ai_mode;
+    self.ai_mode
   }
 
   pub fn set_google_api_key(&mut self, key: String) {

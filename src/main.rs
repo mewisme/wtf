@@ -38,7 +38,7 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Commands {
-  /// Add a custom typo fix
+  /// Add a custom typo fix (alias: a)
   #[command(name = "add", alias = "a")]
   Add {
     /// The wrong command (typo)
@@ -47,26 +47,26 @@ enum Commands {
     correct: String,
   },
 
-  /// Remove a custom typo fix
+  /// Remove a custom typo fix (alias: rm)
   #[command(name = "remove", alias = "rm")]
   Remove {
     /// The wrong command to remove
     wrong: String,
   },
 
-  /// List all custom typos
+  /// List all custom typos (alias: ls)
   #[command(name = "list", alias = "ls")]
   List,
 
-  /// Clear all custom typos
+  /// Clear all custom typos (alias: cls)
   #[command(name = "clear", alias = "cls")]
   Clear,
 
-  /// Show config file location
+  /// Show config file location (alias: cfg)
   #[command(name = "config", alias = "cfg")]
   Config,
 
-  /// Add the wrong command from history to custom fixes
+  /// Add the wrong command from history to custom fixes (alias: s)
   #[command(name = "save", alias = "s")]
   Save {
     /// The correct command
@@ -80,26 +80,37 @@ enum Commands {
     api_key: String,
   },
 
-  /// Add wtf to PATH environment variable
+  /// Add wtf to PATH environment variable (alias: i)
   #[command(name = "install", alias = "i")]
   Install,
 
-  /// Remove wtf from PATH environment variable
+  /// Remove wtf from PATH environment variable (alias: u)
   #[command(name = "uninstall", alias = "u")]
   Uninstall,
 
-  /// Enable or disable auto-mode (auto-run first suggestion)
+  /// Enable or disable auto-mode (auto-run first suggestion) (alias: am)
   #[command(name = "auto-mode", alias = "am")]
   AutoMode {
     /// Enable (true) or disable (false) auto-mode
     enabled: bool,
   },
 
-  /// Toggle auto-mode on/off
+  /// Toggle auto-mode on/off (alias: ta)
   #[command(name = "toggle-auto", alias = "ta")]
   ToggleAuto,
 
-  /// Configure bash history for real-time updates (Linux only)
+  /// Enable or disable AI mode (always use --ai flag) (alias: aim)
+  #[command(name = "ai-mode", alias = "aim")]
+  AiMode {
+    /// Enable (true) or disable (false) AI mode
+    enabled: bool,
+  },
+
+  /// Toggle AI mode on/off (alias: tai)
+  #[command(name = "toggle-ai", alias = "tai")]
+  ToggleAi,
+
+  /// Configure bash history for real-time updates (Linux only) (alias: ch)
   #[command(name = "config-history", alias = "ch")]
   ConfigHistory,
 }
@@ -152,13 +163,19 @@ async fn main() {
     Some(Commands::ToggleAuto) => {
       handle_toggle_auto(&mut user_config);
     }
+    Some(Commands::AiMode { enabled }) => {
+      handle_ai_mode(&mut user_config, enabled);
+    }
+    Some(Commands::ToggleAi) => {
+      handle_toggle_ai(&mut user_config);
+    }
     Some(Commands::ConfigHistory) => {
       handle_config_history();
     }
     None => {
       let auto_yes = cli.yes || user_config.auto_mode;
 
-      if cli.ai {
+      if cli.ai || user_config.ai_mode {
         handle_ai_fix(auto_yes, cli.debug).await;
       } else {
         handle_fix(auto_yes, cli.debug, &user_config);
@@ -606,6 +623,77 @@ fn handle_toggle_auto(config: &mut UserConfig) {
     println!(
       "{}",
       "wtf will now prompt before running suggestions.".bright_cyan()
+    );
+  }
+}
+
+fn handle_ai_mode(config: &mut UserConfig, enabled: bool) {
+  config.set_ai_mode(enabled);
+
+  if let Err(e) = config.save() {
+    display_error(&format!("Failed to save config: {}", e));
+    std::process::exit(1);
+  }
+
+  if enabled {
+    println!(
+      "{} {}",
+      "✓".bright_green(),
+      "AI mode enabled!".bright_green()
+    );
+    println!();
+    println!(
+      "{}",
+      "wtf will now use AI for command fixing (requires Google Gemini API key).".bright_cyan()
+    );
+    println!();
+    println!(
+      "{}",
+      "This is equivalent to always using 'wtf --ai'".dimmed()
+    );
+  } else {
+    println!(
+      "{} {}",
+      "✓".bright_green(),
+      "AI mode disabled!".bright_green()
+    );
+    println!();
+    println!(
+      "{}",
+      "wtf will now use pattern matching for command fixing.".bright_cyan()
+    );
+  }
+}
+
+fn handle_toggle_ai(config: &mut UserConfig) {
+  let new_state = config.toggle_ai_mode();
+
+  if let Err(e) = config.save() {
+    display_error(&format!("Failed to save config: {}", e));
+    std::process::exit(1);
+  }
+
+  if new_state {
+    println!(
+      "{} {}",
+      "✓".bright_green(),
+      "AI mode toggled ON!".bright_green()
+    );
+    println!();
+    println!(
+      "{}",
+      "wtf will now use AI for command fixing.".bright_cyan()
+    );
+  } else {
+    println!(
+      "{} {}",
+      "✓".bright_green(),
+      "AI mode toggled OFF!".bright_green()
+    );
+    println!();
+    println!(
+      "{}",
+      "wtf will now use pattern matching for command fixing.".bright_cyan()
     );
   }
 }
