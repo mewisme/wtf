@@ -38,11 +38,13 @@ A cross-platform CLI tool that fixes typos in your previous shell commands. When
 ### APT (Debian/Ubuntu) - Recommended
 
 ```bash
-# Add Mewisme APT repository
-curl -fsSL https://apt.mewis.me/mewisme.asc | sudo tee /etc/apt/keyrings/mewisme.gpg >/dev/null
-echo "deb [signed-by=/etc/apt/keyrings/mewisme.gpg] https://apt.mewis.me stable main" | sudo tee /etc/apt/sources.list.d/mewisme.list
+# Add GPG key (required for signed repository)
+curl -fsSL https://repo.mewis.me/apt/mewisme.asc | gpg --dearmor | sudo tee /usr/share/keyrings/mewisme-archive-keyring.gpg >/dev/null
 
-# Install WTF
+# Add repository with GPG verification
+echo "deb [signed-by=/usr/share/keyrings/mewisme-archive-keyring.gpg] https://repo.mewis.me/apt/ stable main" | sudo tee /etc/apt/sources.list.d/mewisme.list
+
+# Update and install packages
 sudo apt update
 sudo apt install wtf
 
