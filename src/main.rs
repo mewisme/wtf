@@ -105,6 +105,12 @@ async fn main() {
   let cli = Cli::parse();
   let mut user_config = UserConfig::load();
 
+  // Auto-complete first run if installed via system package manager
+  if !user_config.first_run_complete && is_system_installed() {
+    user_config.mark_first_run_complete();
+    let _ = user_config.save();
+  }
+
   // Check for first-run and prompt for installation
   if !user_config.first_run_complete && cli.command.is_none() {
     handle_first_run_prompt(&mut user_config);
@@ -155,6 +161,21 @@ async fn main() {
       }
     }
   }
+}
+
+fn is_system_installed() -> bool {
+  use std::env;
+
+  if let Ok(exe_path) = env::current_exe() {
+    if let Some(exe_str) = exe_path.to_str() {
+      // Check if installed via system package manager
+      let system_paths = ["/usr/local/bin", "/usr/bin", "/opt", "/bin"];
+
+      return system_paths.iter().any(|path| exe_str.starts_with(path));
+    }
+  }
+
+  false
 }
 
 fn handle_first_run_prompt(config: &mut UserConfig) {

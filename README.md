@@ -17,7 +17,22 @@ A cross-platform CLI tool that fixes typos in your previous shell commands. When
 
 ## 📦 Installation
 
-### Easy Installation (Recommended)
+### APT (Debian/Ubuntu) - Recommended
+
+```bash
+# Add Mewisme APT repository
+curl -fsSL https://apt.mewis.me/mewisme.asc | sudo tee /etc/apt/keyrings/mewisme.gpg >/dev/null
+echo "deb [signed-by=/etc/apt/keyrings/mewisme.gpg] https://apt.mewis.me stable main" | sudo tee /etc/apt/sources.list.d/mewisme.list
+
+# Install WTF
+sudo apt update
+sudo apt install wtf
+
+# Ready to use!
+wtf --version
+```
+
+### Build from Source
 
 ```bash
 # 1. Build from source
