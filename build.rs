@@ -9,6 +9,4 @@ fn main() {
 }
 
 #[cfg(not(windows))]
-fn main() {
-  // No build steps needed for Unix systems
-}
+fn main() {}

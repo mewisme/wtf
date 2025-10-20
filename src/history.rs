@@ -29,7 +29,6 @@ pub fn get_last_command() -> Result<String, String> {
     ShellType::Fish => parse_fish_history(&content),
   };
 
-  // Provide helpful error message for bash users
   if result.is_err() && matches!(shell_type, ShellType::Bash) {
     return Err(
       "History file is not up to date. Add this to your ~/.bashrc:\n\
@@ -74,7 +73,6 @@ fn get_history_path() -> Result<PathBuf, String> {
   } else {
     let home = dirs::home_dir().ok_or("Home directory not found")?;
 
-    // First, check if HISTFILE environment variable is set
     if let Ok(histfile) = env::var("HISTFILE") {
       let path = PathBuf::from(histfile);
       if path.exists() {
@@ -82,7 +80,6 @@ fn get_history_path() -> Result<PathBuf, String> {
       }
     }
 
-    // Fall back to common history file locations
     let possible_paths = vec![
       home.join(".zsh_history"),
       home.join(".bash_history"),

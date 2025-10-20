@@ -19,11 +19,9 @@ pub fn add_to_path() -> Result<(), String> {
   let install_dir = get_install_dir()?;
   let current_exe = get_current_exe()?;
 
-  // Create install directory
   fs::create_dir_all(&install_dir)
     .map_err(|e| format!("Failed to create install directory: {}", e))?;
 
-  // Copy binary to install directory
   let dest = install_dir.join("wtf.exe");
   fs::copy(&current_exe, &dest).map_err(|e| format!("Failed to copy binary: {}", e))?;
 
@@ -31,7 +29,6 @@ pub fn add_to_path() -> Result<(), String> {
   println!("  {}", dest.display().to_string().bright_white());
   println!();
 
-  // Add to PATH using PowerShell
   let install_dir_str = install_dir.to_string_lossy().to_string();
 
   let ps_command = format!(
@@ -71,15 +68,12 @@ pub fn add_to_path() -> Result<(), String> {
   let install_dir = get_install_dir()?;
   let current_exe = get_current_exe()?;
 
-  // Create install directory
   fs::create_dir_all(&install_dir)
     .map_err(|e| format!("Failed to create install directory: {}", e))?;
 
-  // Copy binary to install directory
   let dest = install_dir.join("wtf");
   fs::copy(&current_exe, &dest).map_err(|e| format!("Failed to copy binary: {}", e))?;
 
-  // Make executable
   #[cfg(unix)]
   {
     use std::os::unix::fs::PermissionsExt;
@@ -96,7 +90,6 @@ pub fn add_to_path() -> Result<(), String> {
 
   let install_dir_str = install_dir.to_string_lossy().to_string();
 
-  // Detect shell and provide instructions
   let shell = env::var("SHELL").unwrap_or_else(|_| String::from("unknown"));
   let shell_name = shell.split('/').last().unwrap_or("sh");
 
@@ -134,7 +127,6 @@ pub fn remove_from_path() -> Result<(), String> {
   let install_dir = get_install_dir()?;
   let install_dir_str = install_dir.to_string_lossy().to_string();
 
-  // Remove from PATH using PowerShell
   let ps_command = format!(
     "$path = [Environment]::GetEnvironmentVariable('Path', 'User'); \
          $newPath = ($path -split ';' | Where-Object {{ $_ -ne '{}' }}) -join ';'; \
@@ -154,7 +146,6 @@ pub fn remove_from_path() -> Result<(), String> {
     println!("  {}", install_dir_str.bright_white());
     println!();
 
-    // Optionally remove the binary
     let binary = install_dir.join("wtf.exe");
     if binary.exists() {
       if let Err(e) = fs::remove_file(&binary) {
@@ -164,7 +155,6 @@ pub fn remove_from_path() -> Result<(), String> {
       }
     }
 
-    // Remove directory if empty
     if install_dir.exists() {
       if let Ok(entries) = fs::read_dir(&install_dir) {
         if entries.count() == 0 {
@@ -216,7 +206,6 @@ pub fn remove_from_path() -> Result<(), String> {
 
   println!();
 
-  // Remove the binary
   let binary = install_dir.join("wtf");
   if binary.exists() {
     fs::remove_file(&binary).map_err(|e| format!("Failed to remove binary: {}", e))?;
@@ -224,7 +213,6 @@ pub fn remove_from_path() -> Result<(), String> {
     println!("  {}", binary.display().to_string().bright_white());
   }
 
-  // Remove directory if empty
   if install_dir.exists() {
     if let Ok(entries) = fs::read_dir(&install_dir) {
       if entries.count() == 0 {

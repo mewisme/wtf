@@ -3,14 +3,12 @@ use colored::Colorize;
 use std::env;
 
 pub fn check_api_key() -> Result<String, String> {
-  // Try environment variable first
   if let Ok(key) = env::var("GOOGLE_API_KEY") {
     if !key.is_empty() {
       return Ok(key);
     }
   }
 
-  // Try from config
   let config = UserConfig::load();
   if let Some(key) = config.get_google_api_key() {
     if !key.is_empty() {
@@ -86,7 +84,6 @@ pub async fn fix_command_with_ai(wrong_command: &str) -> Result<String, String> 
 }
 
 fn clean_ai_response(response: &str) -> Result<String, String> {
-  // Clean up the response (remove quotes, markdown, etc.)
   let cleaned = response
     .trim_matches('`')
     .trim_matches('"')

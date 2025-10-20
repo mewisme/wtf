@@ -39,7 +39,7 @@ struct Cli {
 #[derive(Subcommand)]
 enum Commands {
   /// Add a custom typo fix
-  #[command(name = "add")]
+  #[command(name = "add", alias = "a")]
   Add {
     /// The wrong command (typo)
     wrong: String,
@@ -48,26 +48,26 @@ enum Commands {
   },
 
   /// Remove a custom typo fix
-  #[command(name = "remove")]
+  #[command(name = "remove", alias = "rm")]
   Remove {
     /// The wrong command to remove
     wrong: String,
   },
 
   /// List all custom typos
-  #[command(name = "list")]
+  #[command(name = "list", alias = "ls")]
   List,
 
   /// Clear all custom typos
-  #[command(name = "clear")]
+  #[command(name = "clear", alias = "cls")]
   Clear,
 
   /// Show config file location
-  #[command(name = "config")]
+  #[command(name = "config", alias = "cfg")]
   Config,
 
   /// Add the wrong command from history to custom fixes
-  #[command(name = "save")]
+  #[command(name = "save", alias = "s")]
   Save {
     /// The correct command
     correct: String,
@@ -89,15 +89,19 @@ enum Commands {
   Uninstall,
 
   /// Enable or disable auto-mode (auto-run first suggestion)
-  #[command(name = "auto-mode")]
+  #[command(name = "auto-mode", alias = "am")]
   AutoMode {
     /// Enable (true) or disable (false) auto-mode
     enabled: bool,
   },
 
   /// Toggle auto-mode on/off
-  #[command(name = "toggle-auto")]
+  #[command(name = "toggle-auto", alias = "ta")]
   ToggleAuto,
+
+  /// Configure bash history for real-time updates (Linux only)
+  #[command(name = "config-history", alias = "ch")]
+  ConfigHistory,
 }
 
 #[tokio::main(flavor = "current_thread")]
@@ -105,13 +109,11 @@ async fn main() {
   let cli = Cli::parse();
   let mut user_config = UserConfig::load();
 
-  // Auto-complete first run if installed via system package manager
   if !user_config.first_run_complete && is_system_installed() {
     user_config.mark_first_run_complete();
     let _ = user_config.save();
   }
 
-  // Check for first-run and prompt for installation
   if !user_config.first_run_complete && cli.command.is_none() {
     handle_first_run_prompt(&mut user_config);
   }
@@ -150,8 +152,10 @@ async fn main() {
     Some(Commands::ToggleAuto) => {
       handle_toggle_auto(&mut user_config);
     }
+    Some(Commands::ConfigHistory) => {
+      handle_config_history();
+    }
     None => {
-      // Use -y flag or auto_mode config
       let auto_yes = cli.yes || user_config.auto_mode;
 
       if cli.ai {
@@ -168,7 +172,6 @@ fn is_system_installed() -> bool {
 
   if let Ok(exe_path) = env::current_exe() {
     if let Some(exe_str) = exe_path.to_str() {
-      // Check if installed via system package manager
       let system_paths = ["/usr/local/bin", "/usr/bin", "/opt", "/bin"];
 
       return system_paths.iter().any(|path| exe_str.starts_with(path));
@@ -259,46 +262,112 @@ fn handle_first_run_prompt(config: &mut UserConfig) {
     println!();
   }
 
-  // Check and configure bash history on Linux
   #[cfg(not(target_os = "windows"))]
   check_and_configure_bash_history();
 }
 
 #[cfg(not(target_os = "windows"))]
+fn should_configure_bash_history() -> bool {
+  use std::env;
+  use std::fs;
+
+  let shell = env::var("SHELL").unwrap_or_default();
+  if !shell.contains("bash") {
+    return false;
+  }
+
+  let home = match dirs::home_dir() {
+    Some(h) => h,
+    None => return false,
+  };
+
+  let bashrc_path = home.join(".bashrc");
+  if !bashrc_path.exists() {
+    return false;
+  }
+
+  let bashrc_content = match fs::read_to_string(&bashrc_path) {
+    Ok(content) => content,
+    Err(_) => return false,
+  };
+
+  let has_histappend = bashrc_content.contains("shopt -s histappend");
+  let has_prompt_command =
+    bashrc_content.contains("PROMPT_COMMAND") && bashrc_content.contains("history -a");
+
+  !(has_histappend && has_prompt_command)
+}
+
+#[cfg(not(target_os = "windows"))]
 fn check_and_configure_bash_history() {
+  if should_configure_bash_history() {
+    configure_bash_history();
+  }
+}
+
+#[cfg(not(target_os = "windows"))]
+fn configure_bash_history() {
   use std::env;
   use std::fs;
   use std::io::{self, Write};
 
-  // Only check for bash
   let shell = env::var("SHELL").unwrap_or_default();
   if !shell.contains("bash") {
+    println!();
+    println!(
+      "{}",
+      "Bash history configuration is only for bash shell.".yellow()
+    );
+    println!();
+    println!("{}", format!("Your current shell: {}", shell).dimmed());
     return;
   }
 
   let home = match dirs::home_dir() {
     Some(h) => h,
-    None => return,
+    None => {
+      println!("{}", "Could not find home directory.".red());
+      return;
+    }
   };
 
   let bashrc_path = home.join(".bashrc");
   if !bashrc_path.exists() {
+    println!();
+    println!("{}", "~/.bashrc not found.".yellow());
+    println!();
+    println!(
+      "{}",
+      "Please create it first or configure manually.".dimmed()
+    );
     return;
   }
 
-  // Read current bashrc
   let bashrc_content = match fs::read_to_string(&bashrc_path) {
     Ok(content) => content,
-    Err(_) => return,
+    Err(e) => {
+      println!("{}", format!("Failed to read .bashrc: {}", e).red());
+      return;
+    }
   };
 
-  // Check if already configured
   let has_histappend = bashrc_content.contains("shopt -s histappend");
   let has_prompt_command =
     bashrc_content.contains("PROMPT_COMMAND") && bashrc_content.contains("history -a");
 
   if has_histappend && has_prompt_command {
-    return; // Already configured
+    println!();
+    println!(
+      "{} {}",
+      "✓".bright_green(),
+      "Bash history is already configured!".bright_green()
+    );
+    println!();
+    println!(
+      "{}",
+      "Your .bashrc already has the required settings.".dimmed()
+    );
+    return;
   }
 
   println!();
@@ -324,7 +393,6 @@ fn check_and_configure_bash_history() {
   if answer.is_empty() || answer == "y" || answer == "yes" {
     let mut new_content = bashrc_content.clone();
 
-    // Add newlines before our configuration
     new_content.push_str("\n\n");
     new_content.push_str("# WTF - Command Typo Fixer: Enable real-time history\n");
 
@@ -420,14 +488,12 @@ fn handle_fix(auto_yes: bool, debug: bool, user_config: &UserConfig) {
 }
 
 fn handle_add(config: &mut UserConfig, wrong: String, correct: String) {
-  // Check if it's in built-in fixes
   let builtin_fixes = commands::get_common_fixes();
   let is_builtin = builtin_fixes
     .iter()
     .any(|(typo, fix)| *typo == wrong || fix.0 == correct);
 
   if is_builtin {
-    // If built-in has a fix for this typo, just add the typo to custom
     config.add_from_builtin(wrong.clone(), correct.clone());
     display_info("ℹ This typo is already in built-in database, adding to your custom list.");
   } else {
@@ -613,12 +679,39 @@ fn handle_install() {
       );
       println!();
       println!("{}", "You can now use 'wtf' from anywhere!".bright_cyan());
+      println!();
+
+      #[cfg(not(target_os = "windows"))]
+      {
+        if should_configure_bash_history() {
+          handle_config_history();
+        }
+      }
     }
     Err(e) => {
       display_error(&e);
       std::process::exit(1);
     }
   }
+}
+
+fn handle_config_history() {
+  #[cfg(target_os = "windows")]
+  {
+    println!(
+      "{}",
+      "This command is only available on Linux/Unix systems.".yellow()
+    );
+    println!();
+    println!(
+      "{}",
+      "Bash history configuration is automatic on Windows PowerShell.".dimmed()
+    );
+    return;
+  }
+
+  #[cfg(not(target_os = "windows"))]
+  configure_bash_history();
 }
 
 fn handle_uninstall() {
@@ -642,7 +735,6 @@ fn handle_uninstall() {
 }
 
 async fn handle_ai_fix(auto_yes: bool, debug: bool) {
-  // Check API key first
   if let Err(_) = ai::check_api_key() {
     ai::display_api_key_help();
     std::process::exit(1);
@@ -699,7 +791,6 @@ async fn handle_ai_fix(auto_yes: bool, debug: bool) {
           );
           println!();
 
-          // Fall back to regular fix
           let user_config = UserConfig::load();
           handle_fix(auto_yes, debug, &user_config);
         }

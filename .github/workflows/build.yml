@@ -103,27 +103,6 @@ jobs:
             binary_name: wtf
             binary_path: target/x86_64-unknown-linux-gnu/release/wtf
 
-          - os: ubuntu-latest
-            target: i686-unknown-linux-musl
-            artifact_name: wtf-linux-x86
-            binary_name: wtf
-            binary_path: target/i686-unknown-linux-musl/release/wtf
-            cross: true
-
-          - os: ubuntu-latest
-            target: aarch64-unknown-linux-musl
-            artifact_name: wtf-linux-aarch64
-            binary_name: wtf
-            binary_path: target/aarch64-unknown-linux-musl/release/wtf
-            cross: true
-
-          - os: ubuntu-latest
-            target: armv7-unknown-linux-musleabihf
-            artifact_name: wtf-linux-armv7
-            binary_name: wtf
-            binary_path: target/armv7-unknown-linux-musleabihf/release/wtf
-            cross: true
-
           # macOS
           - os: macos-latest
             target: x86_64-apple-darwin
@@ -156,20 +135,8 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-cargo-
 
-      - name: Install cross for ARM builds
-        if: matrix.cross == true
-        run: |
-          curl -L https://github.com/cross-rs/cross/releases/download/v0.2.5/cross-x86_64-unknown-linux-gnu.tar.gz | tar xz
-          sudo mv cross /usr/local/bin/
-          cross --version
-
-      - name: Build binary (native)
-        if: matrix.cross != true
+      - name: Build binary
         run: cargo build --release --target ${{ matrix.target }}
-
-      - name: Build binary (cross)
-        if: matrix.cross == true
-        run: cross build --release --target ${{ matrix.target }}
 
       - name: Rename binary with extension
         shell: bash
@@ -235,9 +202,6 @@ jobs:
             wtf-win-x86/*
             wtf-win-aarch64/*
             wtf-linux-x86_64/*
-            wtf-linux-x86/*
-            wtf-linux-aarch64/*
-            wtf-linux-armv7/*
             wtf-macos-x86_64/*
             wtf-macos-aarch64/*
           tag_name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || format('v{0}', needs.check-version.outputs.version) }}

@@ -24,10 +24,7 @@ A cross-platform CLI tool that fixes typos in your previous shell commands. When
 | **Windows** | x86_64 (64-bit) | `wtf-win-x86_64.exe` | Intel/AMD 64-bit processors |
 | **Windows** | x86 (32-bit) | `wtf-win-x86.exe` | Intel/AMD 32-bit processors |
 | **Windows** | ARM64 | `wtf-win-aarch64.exe` | ARM-based Windows devices |
-| **Linux** | x86_64 (64-bit) | `wtf-linux-x86_64` | Intel/AMD 64-bit (glibc) |
-| **Linux** | x86 (32-bit) | `wtf-linux-x86` | Intel/AMD 32-bit (musl, static) |
-| **Linux** | ARM64 (aarch64) | `wtf-linux-aarch64` | ARM servers, Pi 4+ (musl, static) |
-| **Linux** | ARMv7 (32-bit) | `wtf-linux-armv7` | Raspberry Pi 3 (musl, static) |
+| **Linux** | x86_64 (64-bit) | `wtf-linux-x86_64` | Intel/AMD 64-bit processors |
 | **macOS** | x86_64 (Intel) | `wtf-macos-x86_64` | Intel-based Macs |
 | **macOS** | ARM64 (Apple Silicon) | `wtf-macos-aarch64` | M1, M2, M3, M4 Macs |
 
@@ -36,12 +33,6 @@ A cross-platform CLI tool that fixes typos in your previous shell commands. When
 - ✅ Google Gemini AI integration
 - ✅ Auto-mode and custom typos
 - ✅ PATH management with `install`/`uninstall` commands
-
-**About musl binaries:**
-- **Static linking**: Musl binaries are fully self-contained, no system dependencies
-- **Universal compatibility**: Work on any Linux distro regardless of GLIBC version
-- **Slightly larger**: ~500KB larger than glibc, but more portable
-- **Best for**: ARM devices, embedded systems, old distros, containers
 
 ### APT (Debian/Ubuntu) - Recommended
 
@@ -63,20 +54,10 @@ wtf --version
 Download the latest release for your platform from [GitHub Releases](https://github.com/mewisme/wtf/releases):
 
 ```bash
-# Linux x86_64 (64-bit)
+# Linux x86_64
 wget https://github.com/mewisme/wtf/releases/latest/download/wtf-linux-x86_64
 chmod +x wtf-linux-x86_64
 sudo mv wtf-linux-x86_64 /usr/local/bin/wtf
-
-# Linux x86 (32-bit)
-wget https://github.com/mewisme/wtf/releases/latest/download/wtf-linux-x86
-chmod +x wtf-linux-x86
-sudo mv wtf-linux-x86 /usr/local/bin/wtf
-
-# Linux ARM64
-wget https://github.com/mewisme/wtf/releases/latest/download/wtf-linux-aarch64
-chmod +x wtf-linux-aarch64
-sudo mv wtf-linux-aarch64 /usr/local/bin/wtf
 
 # macOS Intel
 curl -L https://github.com/mewisme/wtf/releases/latest/download/wtf-macos-x86_64 -o wtf
@@ -138,8 +119,17 @@ wtf uninstall    # or short: wtf u
 
 **Automatic Configuration (Recommended):**
 
-On first run, `wtf` will automatically detect if you're using bash and offer to configure it for you:
+Bash history will be automatically configured:
+- ✅ **On first run** - During initial setup wizard
+- ✅ **After `wtf install`** - Automatically runs after PATH installation
+- ✅ **Manual command** - Run `wtf config-history` (or `wtf ch`) anytime
 
+```bash
+# Configure bash history manually
+wtf config-history    # or short: wtf ch
+```
+
+Example output:
 ```
 📝 Bash History Configuration
 
@@ -529,22 +519,34 @@ wtf --ai                  # Use AI to fix command
 
 # Custom Typo Management
 wtf add <wrong> <correct> # Add custom typo
+wtf a <wrong> <correct>   # Same as add
 wtf save <correct>        # Save last command as typo
+wtf s <correct>           # Same as save
 wtf list                  # List custom typos
+wtf ls                    # Same as list
 wtf remove <wrong>        # Remove custom typo
+wtf rm <wrong>            # Same as remove
 wtf clear                 # Clear all custom typos
+wtf cls                   # Same as clear
 
 # Configuration
 wtf config                # Show config file location
+wtf cfg                   # Same as config
 wtf set-api-key <key>     # Set Google AI API key
 wtf auto-mode <true|false> # Enable/disable auto-run mode
+wtf am <true|false>        # Same as auto-mode
 wtf toggle-auto           # Toggle auto-mode on/off
+wtf ta                    # Same as toggle-auto
 
 # PATH Management
 wtf install               # Add to PATH (short: i)
 wtf i                     # Same as install
 wtf uninstall             # Remove from PATH (short: u)
 wtf u                     # Same as uninstall
+
+# System Configuration
+wtf config-history        # Configure bash history (Linux only, short: ch)
+wtf ch                    # Same as config-history
 
 # Info
 wtf --help                # Show help
@@ -565,8 +567,8 @@ wtf --version             # Show version
 ## 🔧 Configuration
 
 Config file location:
-- **Windows**: `%APPDATA%\wtf\config.json`
-- **Linux/macOS**: `~/.config/wtf/config.json`
+- **Windows**: `C:\Users\<username>\.wtf\config.json`
+- **Linux/macOS**: `~/.wtf/config.json`
 
 Format:
 ```json

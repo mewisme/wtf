@@ -58,10 +58,8 @@ impl UserConfig {
   }
 
   pub fn add_typo(&mut self, wrong: String, correct: String) {
-    // Remove if already exists
     self.custom_typos.retain(|(w, _)| w != &wrong);
 
-    // Add new entry
     self.custom_typos.push((wrong, correct));
   }
 
@@ -72,7 +70,6 @@ impl UserConfig {
   }
 
   pub fn add_from_builtin(&mut self, wrong: String, correct: String) {
-    // When adding from built-in, check if it's not already there
     if !self.custom_typos.iter().any(|(w, _)| w == &wrong) {
       self.custom_typos.push((wrong, correct));
     }
