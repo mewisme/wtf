@@ -1,6 +1,6 @@
 [package]
 name = "wtf"
-version = "0.0.3"
+version = "0.0.3-hotfix.1"
 edition = "2021"
 authors = ["Mew <mauminh.nguyen@gmail.com>"]
 license = "MIT"

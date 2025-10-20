@@ -31,7 +31,7 @@ struct Cli {
   #[arg(short, long, global = true)]
   debug: bool,
 
-  /// Use AI to fix the command (requires OpenAI API key)
+  /// Use AI to fix the command (requires Google Gemini API key)
   #[arg(long, global = true)]
   ai: bool,
 }
